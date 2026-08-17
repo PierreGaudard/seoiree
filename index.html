@@ -14,7 +14,7 @@
 <header class="hero">
   <p class="hero__kicker">Septembre à octobre 2026</p>
   <h1 class="hero__title">SEOirée</h1>
-  <p class="hero__sub">Indiquez les samedis et dimanches où vous n'êtes pas disponible. Le classement des week-ends se met à jour à chaque réponse.</p>
+  <p class="hero__sub">Indiquez les samedis et dimanches où vous n'êtes pas disponible.</p>
   <p class="hero__status" id="status" role="status" aria-live="polite"></p>
 </header>
 
@@ -28,10 +28,6 @@
     </div>
 
     <div id="joinBlock">
-      <p class="card__intro">
-        Une seule inscription par personne. Si vous avez déjà répondu, retrouvez votre nom dans la liste
-        pour modifier votre réponse.
-      </p>
       <div class="actions actions--start">
         <button type="button" class="btn btn--primary" id="btnJoin">Je souhaite participer</button>
         <button type="button" class="btn btn--ghost" id="btnBack">J'ai déjà répondu</button>
@@ -57,11 +53,6 @@
       <span class="step">2</span>
       <h2>Vos indisponibilités</h2>
     </div>
-    <p class="card__intro">
-      Sélectionnez les <strong>samedis et dimanches</strong> où vous n'êtes pas disponible. Les jours de semaine
-      ne sont pas sélectionnables. Si vous êtes disponible partout, ne cochez rien et validez.
-    </p>
-
     <div class="legend">
       <span class="legend__item"><i class="dot dot--free"></i>Disponible</span>
       <span class="legend__item"><i class="dot dot--busy"></i>Indisponible</span>
@@ -103,8 +94,6 @@
 <dialog class="modal" id="modal" aria-labelledby="modalTitle">
   <form id="identityForm" class="modal__inner" novalidate>
     <h2 class="modal__title" id="modalTitle">Je souhaite participer</h2>
-    <p class="modal__intro" id="modalIntro"></p>
-
     <div id="nameFields" class="stack">
       <div class="field">
         <label for="firstName">Prénom</label>
@@ -125,7 +114,7 @@
 
     <div id="prefsFields" class="stack">
       <div class="field">
-        <label for="budget">Budget maximum par personne</label>
+        <label for="budget">Ce que vous êtes prêt à payer</label>
         <select id="budget" name="budget"></select>
       </div>
 
@@ -143,11 +132,6 @@
         <label for="access">Accessibilité</label>
         <select id="access" name="access"></select>
       </div>
-
-      <div class="field">
-        <label for="notes">Allergies ou précisions <span class="opt">(optionnel)</span></label>
-        <input type="text" id="notes" name="notes" maxlength="140" placeholder="Allergie aux fruits à coque, arrivée samedi midi">
-      </div>
     </div>
 
     <p class="error" id="identityError" hidden></p>
@@ -160,7 +144,7 @@
 </dialog>
 
 <footer class="foot">
-  <p>Aucun compte, aucun cookie publicitaire, aucun suivi.</p>
+  <p>Aucun compte, aucun suivi.</p>
 </footer>
 
 <script src="config.js"></script>

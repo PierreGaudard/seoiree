@@ -13,15 +13,16 @@ Chacun clique sur **Je souhaite participer**, renseigne prénom + nom (obligatoi
 
 ## Les questions posées à l'inscription
 
+Uniquement des listes et des cases à cocher, aucun champ de saisie libre.
+
 | Question | Format | Ce qu'on en fait |
 |---|---|---|
-| Budget max par personne | liste (moins de 50 € → plus de 250 €) | le récap affiche le **plancher du groupe**, c'est lui qui contraint le choix du lieu |
-| Comment tu viens | liste (voiture avec places, voiture complète, cherche une place, transports en commun, peu importe) | compte les voitures disponibles et les personnes à caser |
+| Ce que vous êtes prêt à payer | liste (moins de 50 € jusqu'à plus de 250 €) | le récap affiche le **budget le plus serré du groupe**, celui qui contraint le choix |
+| Comment venez-vous | liste (voiture avec places, voiture complète, cherche une place, transports en commun, peu importe) | compte les voitures disponibles et les personnes à caser |
 | Régime alimentaire | cases multiples (végétarien, végan, sans gluten, sans lactose, sans porc, sans alcool) | liste des régimes à prévoir, avec le nombre de personnes |
-| Accessibilité | liste (aucun besoin, accès PMR, trajet court, autre) | signale nominativement les contraintes |
-| Allergies ou précisions | texte libre, optionnel | remonte tel quel dans le récap |
+| Accessibilité | liste (aucun besoin, accès PMR, trajet court) | signale nominativement les contraintes |
 
-Tout est modifiable après coup via **Modifier mes infos pratiques**. Ces réponses alimentent le bloc « Le récap du groupe » sous le classement.
+Tout est modifiable après coup via **Modifier mes informations**. Ces réponses alimentent le bloc « Récapitulatif du groupe » sous le classement.
 
 ## 1. La base Firebase (déjà en place)
 

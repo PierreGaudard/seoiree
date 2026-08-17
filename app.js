@@ -51,8 +51,7 @@
   var ACCESS = [
     { v: "", l: "Aucun besoin particulier" },
     { v: "pmr", l: "Accès PMR nécessaire" },
-    { v: "short-trip", l: "Je préfère un trajet court" },
-    { v: "other", l: "Autre contrainte (voir précisions)" }
+    { v: "short-trip", l: "Je préfère un trajet court" }
   ];
 
   function labelOf(list, value) {
@@ -145,7 +144,6 @@
     myPrefs: $("myPrefs"),
     modal: $("modal"),
     modalTitle: $("modalTitle"),
-    modalIntro: $("modalIntro"),
     modalSubmit: $("modalSubmit"),
     modalCancel: $("modalCancel"),
     identityForm: $("identityForm"),
@@ -159,7 +157,6 @@
     transport: $("transport"),
     dietChips: $("dietChips"),
     access: $("access"),
-    notes: $("notes"),
     identityError: $("identityError"),
     cardCalendar: $("cardCalendar"),
     months: $("months"),
@@ -293,8 +290,7 @@
       ["Régime", (p.diets && p.diets.length)
         ? p.diets.map(function (d) { return labelOf(DIETS, d) || d; }).join(", ")
         : "Aucune restriction"],
-      ["Accessibilité", labelOf(ACCESS, p.access)],
-      ["Précisions", p.notes || "non renseigné"]
+      ["Accessibilité", labelOf(ACCESS, p.access)]
     ];
     el.myPrefs.innerHTML = rows.map(function (r) {
       return "<li><span>" + r[0] + "</span><b>" + escapeHtml(r[1] || "non renseigné") + "</b></li>";
@@ -326,8 +322,7 @@
       budget: el.budget.value,
       transport: el.transport.value,
       diets: diets,
-      access: el.access.value,
-      notes: el.notes.value.trim()
+      access: el.access.value
     };
   }
 
@@ -336,7 +331,6 @@
     el.budget.value = p.budget || "";
     el.transport.value = p.transport || "";
     el.access.value = p.access || "";
-    el.notes.value = p.notes || "";
     var set = {};
     (p.diets || []).forEach(function (d) { set[d] = true; });
     Array.prototype.forEach.call(el.dietChips.querySelectorAll('input[name="diet"]'), function (i) {
@@ -349,21 +343,9 @@
   var modalMode = "join"; // "join" | "edit" | "prefs"
 
   var MODAL_TEXT = {
-    join: {
-      title: "Je souhaite participer",
-      intro: "Prénom et nom obligatoires, une seule inscription par personne. Les autres questions servent à organiser la sortie.",
-      cta: "Je m'inscris"
-    },
-    edit: {
-      title: "J'ai déjà répondu",
-      intro: "Sélectionnez votre nom dans la liste pour récupérer votre réponse et la modifier.",
-      cta: "Continuer"
-    },
-    prefs: {
-      title: "Mes informations",
-      intro: "Mettez à jour ce qui a changé.",
-      cta: "Enregistrer"
-    }
+    join:  { title: "Je souhaite participer", cta: "Je m'inscris" },
+    edit:  { title: "J'ai déjà répondu",       cta: "Continuer" },
+    prefs: { title: "Mes informations",        cta: "Enregistrer" }
   };
 
   /* liste déroulante des participants déjà inscrits */
@@ -396,7 +378,6 @@
     modalMode = mode;
     var t = MODAL_TEXT[mode];
     el.modalTitle.textContent = t.title;
-    el.modalIntro.textContent = t.intro;
     el.modalSubmit.textContent = t.cta;
     el.identityError.hidden = true;
 
@@ -730,7 +711,7 @@
       if (idx !== -1 && (lowest === null || idx < lowest)) lowest = idx;
     });
     if (lowest !== null) {
-      rows.push(["Budget à ne pas dépasser", labelOf(BUDGETS, order[lowest]) +
+      rows.push(["Budget le plus serré", labelOf(BUDGETS, order[lowest]) +
         (unsetBudget ? " (" + unsetBudget + " sans réponse)" : "")]);
     }
 
@@ -766,10 +747,6 @@
         return p.firstName + " " + p.lastName.charAt(0) + "." + " : " + labelOf(ACCESS, p.prefs.access);
       });
     if (acc.length) rows.push(["Accessibilité", acc.join(" ; ")]);
-
-    var notes = people.filter(function (p) { return (p.prefs || {}).notes; })
-      .map(function (p) { return p.firstName + " : " + p.prefs.notes; });
-    if (notes.length) rows.push(["Précisions", notes.join(" ; ")]);
 
     el.recapList.innerHTML = rows.map(function (r) {
       return "<li><span>" + escapeHtml(r[0]) + "</span><b>" + escapeHtml(r[1]) + "</b></li>";
