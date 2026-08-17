@@ -75,7 +75,7 @@ git push
 
 Le déploiement prend une à deux minutes après le push.
 
-Les balises de `styles.css` et `app.js` dans `index.html` portent un paramètre de version (`?v=6`). **Incrémentez-le à chaque modification de ces fichiers** : sans ça, un navigateur qui a déjà visité le site peut charger un ancien script avec le nouveau HTML, ce qui casse l'interface (boutons sans effet).
+Les balises de `styles.css` et `app.js` dans `index.html` portent un paramètre de version (`?v=8`). **Incrémentez-le à chaque modification de ces fichiers** : sans ça, un navigateur qui a déjà visité le site peut charger un ancien script avec le nouveau HTML, ce qui casse l'interface (boutons sans effet).
 
 ## 3. Tester en local
 

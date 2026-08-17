@@ -386,6 +386,12 @@
     el.modalSubmit.textContent = t.cta;
     el.identityError.hidden = true;
 
+    // toujours repartir d'un formulaire actif : sans cette remise à zéro, un
+    // passage par la liste vide laissait le bouton grisé pour de bon
+    el.modalSubmit.disabled = false;
+    el.whoPicker.disabled = false;
+    clearFieldErrors();
+
     el.nameFields.hidden = (mode !== "join");
     el.pickFields.hidden = (mode !== "edit");
     el.prefsFields.hidden = (mode === "edit");
@@ -440,6 +446,21 @@
     el.identityError.innerHTML = msg;
     el.identityError.hidden = false;
   }
+
+  function clearFieldErrors() {
+    el.firstName.classList.remove("is-invalid");
+    el.lastName.classList.remove("is-invalid");
+  }
+
+  /* signale les champs obligatoires vides et place le curseur sur le premier */
+  function markMissing(fields) {
+    clearFieldErrors();
+    fields.forEach(function (f) { f.classList.add("is-invalid"); });
+    if (fields.length) fields[0].focus();
+  }
+
+  el.firstName.addEventListener("input", clearFieldErrors);
+  el.lastName.addEventListener("input", clearFieldErrors);
 
   function safeOpen(mode) {
     try {
@@ -500,9 +521,15 @@
     var f = titleCase(el.firstName.value);
     var l = titleCase(el.lastName.value);
     if (!f || !l) {
-      fail("Le prénom et le nom sont obligatoires.");
+      var missing = [];
+      if (!f) missing.push(el.firstName);
+      if (!l) missing.push(el.lastName);
+      markMissing(missing);
+      fail(!f && !l ? "Renseignez votre prénom et votre nom."
+                    : (!f ? "Renseignez votre prénom." : "Renseignez votre nom."));
       return;
     }
+    clearFieldErrors();
     var key = slugify(f + " " + l);
     if (!key) {
       fail("Ce prénom et ce nom ne sont pas exploitables, utilisez des lettres.");

@@ -147,6 +147,7 @@ body {
   color: var(--ink);
 }
 .opt { color: var(--ink-dim); font-weight: 400; }
+.req { color: var(--busy); font-weight: 400; font-size: 0.8rem; }
 
 input[type="text"],
 select {
@@ -201,6 +202,19 @@ select:focus-visible {
   font-weight: 600;
 }
 .chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* champ obligatoire non rempli : doit passer après les règles input/select
+   ci-dessus, sinon la couleur de fond par défaut l'emporte */
+input[type="text"].is-invalid,
+select.is-invalid {
+  border-color: var(--busy);
+  background-color: var(--busy-soft);
+}
+input[type="text"].is-invalid:focus-visible,
+select.is-invalid:focus-visible {
+  outline-color: var(--busy);
+  border-color: var(--busy);
+}
 
 .error {
   margin: 0;
