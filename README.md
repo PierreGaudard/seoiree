@@ -22,18 +22,17 @@ Chacun clique sur **Je souhaite participer**, renseigne prénom + nom (obligatoi
 
 Tout est modifiable après coup via **Modifier mes infos pratiques**. Ces réponses alimentent le bloc « Le récap du groupe » sous le classement.
 
-## 1. Créer la base Firebase (3 minutes)
+## 1. La base Firebase (déjà en place)
 
-Sans base configurée, l'appli tourne en mode local : chacun ne voit que ses propres réponses. Pour partager :
+Le stockage partagé est opérationnel, rien à faire :
 
-1. Va sur https://console.firebase.google.com et clique **Créer un projet** (nom : `seoiree`). Tu peux décocher Google Analytics.
-2. Dans le menu de gauche : **Créer** → **Realtime Database** → **Créer une base de données**.
-   - Emplacement : `europe-west1` (Belgique).
-   - Règles de sécurité : choisis **Démarrer en mode test**.
-3. Copie l'URL affichée en haut de la base, du type :
-   `https://seoiree-1a2b3-default-rtdb.europe-west1.firebasedatabase.app`
-4. Colle-la dans `config.js`, champ `dbUrl` (sans slash final).
-5. Onglet **Règles** de la Realtime Database, remplace tout par ceci puis **Publier** :
+- Projet Firebase : **seoiree** (`seoiree-ad079`), plan gratuit Spark, compte pierre@datashake.fr
+- Realtime Database : `https://seoiree-ad079-default-rtdb.europe-west1.firebasedatabase.app` (Belgique, europe-west1)
+- Console : https://console.firebase.google.com/project/seoiree-ad079/database
+- Google Analytics et Gemini volontairement désactivés à la création
+- L'URL est déjà renseignée dans `config.js` → `dbUrl`
+
+Les règles publiées n'ouvrent que la branche des participants, et exigent un prénom et un nom :
 
 ```json
 {
@@ -53,9 +52,11 @@ Sans base configurée, l'appli tourne en mode local : chacun ne voit que ses pro
 }
 ```
 
-Ces règles n'autorisent lecture et écriture que sur la branche des participants, rien d'autre dans la base. Le "mode test" par défaut expire au bout de 30 jours, ces règles-là n'expirent pas.
+Vérifié en conditions réelles : écriture d'un participant valide acceptée, écriture sans prénom/nom refusée (401), écriture ailleurs dans la base refusée (401), lecture de la racine refusée (401). Contrairement au « mode test » proposé par défaut, ces règles n'expirent pas au bout de 30 jours.
 
-À savoir : n'importe qui ayant l'URL de l'appli peut lire et écrire les réponses. C'est voulu (zéro friction, pas de compte à créer) et sans enjeu pour une liste de dispos. N'y mets rien de sensible.
+À savoir : n'importe qui ayant l'URL de l'appli peut lire et écrire les réponses des participants. C'est voulu (zéro friction, aucun compte à créer) et sans enjeu pour une liste de dispos. N'y mets rien de sensible.
+
+Pour repartir de zéro (nouvelle édition), change `edition` dans `config.js` : les anciennes données restent en base sous leur propre clé.
 
 ## 2. Publier sur GitHub Pages
 

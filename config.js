@@ -13,7 +13,7 @@
 
 window.SEOIREE_CONFIG = {
   // URL de la Realtime Database (sans / à la fin)
-  dbUrl: "",
+  dbUrl: "https://seoiree-ad079-default-rtdb.europe-west1.firebasedatabase.app",
 
   // Nom de l'événement (affiché dans le titre)
   eventName: "SEOirée",
