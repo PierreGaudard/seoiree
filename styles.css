@@ -281,6 +281,15 @@ select:focus-visible {
 }
 .modal::backdrop { background: rgba(20, 24, 32, 0.45); }
 
+/* repli si showModal() n'est pas disponible : la modale reste centrée et lisible */
+.modal--fallback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+}
+
 .modal__inner {
   display: grid;
   gap: 0.8rem;

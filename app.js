@@ -27,7 +27,8 @@
     { v: "lt50", l: "Moins de 50 € par personne" },
     { v: "50-100", l: "50 à 100 € par personne" },
     { v: "100-150", l: "100 à 150 € par personne" },
-    { v: "150-250", l: "150 à 250 € par personne" },
+    { v: "150-200", l: "150 à 200 € par personne" },
+    { v: "200-250", l: "200 à 250 € par personne" },
     { v: "gt250", l: "Plus de 250 € par personne" }
   ];
 
@@ -157,6 +158,7 @@
     transport: $("transport"),
     dietChips: $("dietChips"),
     access: $("access"),
+    notes: $("notes"),
     identityError: $("identityError"),
     cardCalendar: $("cardCalendar"),
     months: $("months"),
@@ -290,7 +292,8 @@
       ["Régime", (p.diets && p.diets.length)
         ? p.diets.map(function (d) { return labelOf(DIETS, d) || d; }).join(", ")
         : "Aucune restriction"],
-      ["Accessibilité", labelOf(ACCESS, p.access)]
+      ["Accessibilité", labelOf(ACCESS, p.access)],
+      ["Autres informations", p.notes || "aucune"]
     ];
     el.myPrefs.innerHTML = rows.map(function (r) {
       return "<li><span>" + r[0] + "</span><b>" + escapeHtml(r[1] || "non renseigné") + "</b></li>";
@@ -322,7 +325,8 @@
       budget: el.budget.value,
       transport: el.transport.value,
       diets: diets,
-      access: el.access.value
+      access: el.access.value,
+      notes: el.notes.value.trim()
     };
   }
 
@@ -331,6 +335,7 @@
     el.budget.value = p.budget || "";
     el.transport.value = p.transport || "";
     el.access.value = p.access || "";
+    el.notes.value = p.notes || "";
     var set = {};
     (p.diets || []).forEach(function (d) { set[d] = true; });
     Array.prototype.forEach.call(el.dietChips.querySelectorAll('input[name="diet"]'), function (i) {
@@ -402,17 +407,33 @@
         .then(fillWhoPicker);
     }
 
-    if (typeof el.modal.showModal === "function") el.modal.showModal();
-    else el.modal.setAttribute("open", "");
+    showDialog();
     setTimeout(function () {
       var first = mode === "prefs" ? el.budget : (mode === "edit" ? el.whoPicker : el.firstName);
       first.focus();
     }, 60);
   }
 
+  /* ouverture de la modale : showModal() d'abord, repli manuel si le
+     navigateur ne le gère pas ou s'il refuse (dialog déjà ouvert, etc.) */
+  function showDialog() {
+    try {
+      if (typeof el.modal.showModal === "function" && !el.modal.open) {
+        el.modal.showModal();
+      }
+    } catch (e) { /* on passe au repli */ }
+    if (!el.modal.open) {
+      el.modal.setAttribute("open", "");
+      el.modal.classList.add("modal--fallback");
+    }
+  }
+
   function closeModal() {
-    if (typeof el.modal.close === "function") el.modal.close();
-    else el.modal.removeAttribute("open");
+    el.modal.classList.remove("modal--fallback");
+    try {
+      if (typeof el.modal.close === "function") el.modal.close();
+    } catch (e) { /* on passe au repli */ }
+    if (el.modal.open) el.modal.removeAttribute("open");
   }
 
   function fail(msg) {
@@ -420,9 +441,19 @@
     el.identityError.hidden = false;
   }
 
-  el.btnJoin.addEventListener("click", function () { openModal("join"); });
-  el.btnBack.addEventListener("click", function () { openModal("edit"); });
-  el.editPrefs.addEventListener("click", function () { if (me) openModal("prefs"); });
+  function safeOpen(mode) {
+    try {
+      openModal(mode);
+    } catch (e) {
+      // le formulaire reste utilisable même si une étape d'ouverture échoue
+      showDialog();
+      setStatus("Une erreur est survenue à l'ouverture du formulaire (" + e.message + ").", "err");
+    }
+  }
+
+  el.btnJoin.addEventListener("click", function () { safeOpen("join"); });
+  el.btnBack.addEventListener("click", function () { safeOpen("edit"); });
+  el.editPrefs.addEventListener("click", function () { if (me) safeOpen("prefs"); });
   el.modalCancel.addEventListener("click", closeModal);
 
   el.identityForm.addEventListener("submit", function (ev) {
@@ -742,11 +773,15 @@
     rows.push(["Régimes à prévoir", diets.length ? diets.join(", ") : "aucune restriction déclarée"]);
 
     /* accessibilité et précisions */
+    var notes = people.filter(function (p) { return (p.prefs || {}).notes; })
+      .map(function (p) { return p.firstName + " : " + p.prefs.notes; });
+
     var acc = people.filter(function (p) { return (p.prefs || {}).access; })
       .map(function (p) {
         return p.firstName + " " + p.lastName.charAt(0) + "." + " : " + labelOf(ACCESS, p.prefs.access);
       });
     if (acc.length) rows.push(["Accessibilité", acc.join(" ; ")]);
+    if (notes.length) rows.push(["Autres informations", notes.join(" ; ")]);
 
     el.recapList.innerHTML = rows.map(function (r) {
       return "<li><span>" + escapeHtml(r[0]) + "</span><b>" + escapeHtml(r[1]) + "</b></li>";

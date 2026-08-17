@@ -13,14 +13,13 @@ Chacun clique sur **Je souhaite participer**, renseigne prénom + nom (obligatoi
 
 ## Les questions posées à l'inscription
 
-Uniquement des listes et des cases à cocher, aucun champ de saisie libre.
-
 | Question | Format | Ce qu'on en fait |
 |---|---|---|
-| Ce que vous êtes prêt à payer | liste (moins de 50 € jusqu'à plus de 250 €) | le récap affiche le **budget le plus serré du groupe**, celui qui contraint le choix |
+| Ce que vous êtes prêt à payer | liste (moins de 50 €, 50 à 100, 100 à 150, 150 à 200, 200 à 250, plus de 250) | le récap affiche le **budget le plus serré du groupe**, celui qui contraint le choix |
 | Comment venez-vous | liste (voiture avec places, voiture complète, cherche une place, transports en commun, peu importe) | compte les voitures disponibles et les personnes à caser |
 | Régime alimentaire | cases multiples (végétarien, végan, sans gluten, sans lactose, sans porc, sans alcool) | liste des régimes à prévoir, avec le nombre de personnes |
 | Accessibilité | liste (aucun besoin, accès PMR, trajet court) | signale nominativement les contraintes |
+| Autres informations | texte libre, optionnel | remonte tel quel dans le récap, avec le prénom |
 
 Tout est modifiable après coup via **Modifier mes informations**. Ces réponses alimentent le bloc « Récapitulatif du groupe » sous le classement.
 
@@ -75,6 +74,8 @@ git push
 ```
 
 Le déploiement prend une à deux minutes après le push.
+
+Les balises de `styles.css` et `app.js` dans `index.html` portent un paramètre de version (`?v=6`). **Incrémentez-le à chaque modification de ces fichiers** : sans ça, un navigateur qui a déjà visité le site peut charger un ancien script avec le nouveau HTML, ce qui casse l'interface (boutons sans effet).
 
 ## 3. Tester en local
 

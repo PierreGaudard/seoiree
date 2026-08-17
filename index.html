@@ -7,7 +7,7 @@
 <meta name="description" content="Indiquez les week-ends où vous n'êtes pas disponible. Le classement des dates se met à jour automatiquement.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231d4ed8'/><text x='16' y='23' font-family='Helvetica,Arial' font-size='20' font-weight='bold' fill='%23fff' text-anchor='middle'>S</text></svg>">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
@@ -97,11 +97,11 @@
     <div id="nameFields" class="stack">
       <div class="field">
         <label for="firstName">Prénom</label>
-        <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="Pierre" required>
+        <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="Prénom" required>
       </div>
       <div class="field">
         <label for="lastName">Nom</label>
-        <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="Gaudard" required>
+        <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="Nom" required>
       </div>
     </div>
 
@@ -132,6 +132,11 @@
         <label for="access">Accessibilité</label>
         <select id="access" name="access"></select>
       </div>
+
+      <div class="field">
+        <label for="notes">Autres informations <span class="opt">(allergie, contrainte, arrivée tardive)</span></label>
+        <input type="text" id="notes" name="notes" maxlength="160" placeholder="Allergie aux fruits à coque">
+      </div>
     </div>
 
     <p class="error" id="identityError" hidden></p>
@@ -147,7 +152,7 @@
   <p>Aucun compte, aucun suivi.</p>
 </footer>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script src="config.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
