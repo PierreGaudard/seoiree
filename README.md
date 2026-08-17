@@ -58,26 +58,21 @@ Vérifié en conditions réelles : écriture d'un participant valide acceptée, 
 
 Pour repartir de zéro (nouvelle édition), change `edition` dans `config.js` : les anciennes données restent en base sous leur propre clé.
 
-## 2. Publier sur GitHub Pages
+## 2. En ligne (déjà publié)
+
+- Site : **https://pierregaudard.github.io/seoiree/** ← le lien à partager
+- Repo : https://github.com/PierreGaudard/seoiree (public, branche `main`)
+- GitHub Pages : activé sur `main` / racine, HTTPS forcé
+
+Pour mettre à jour le site, il suffit de pousser :
 
 ```bash
-cd Outils/SEOiree
-git init -b main
-git add .
-git commit -m "SEOirée : premier jet"
-gh repo create pierregaudard/seoiree --public --source=. --push
+cd ~/Desktop/SEO-Claude/Outils/SEOiree
+git add -A && git commit -m "…"
+git push
 ```
 
-Puis sur GitHub : **Settings** → **Pages** → Source : `Deploy from a branch`, branche `main`, dossier `/ (root)` → **Save**.
-
-L'URL sera `https://pierregaudard.github.io/seoiree/` (compte une à deux minutes pour le premier déploiement). C'est ce lien que tu partages.
-
-Sans `gh` installé : crée le repo `seoiree` à la main sur github.com, puis
-
-```bash
-git remote add origin https://github.com/pierregaudard/seoiree.git
-git push -u origin main
-```
+Le déploiement prend une à deux minutes après le push.
 
 ## 3. Tester en local
 
