@@ -1,8 +1,8 @@
 // ============================================================
-//  SEOirée — configuration
+//  SEOirée, configuration
 // ============================================================
 //  Colle ici l'URL de ta Realtime Database Firebase.
-//  Elle ressemble à :
+//  Format attendu :
 //    https://seoiree-xxxxx-default-rtdb.europe-west1.firebasedatabase.app
 //  (sans slash final)
 //

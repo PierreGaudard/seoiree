@@ -1,5 +1,5 @@
 /* ============================================================
-   SEOirée — logique applicative
+   SEOirée, logique applicative
    Aucune dépendance. Stockage : Firebase Realtime Database
    via son API REST, ou localStorage si aucune URL configurée.
    ============================================================ */
@@ -150,6 +150,8 @@
     modalCancel: $("modalCancel"),
     identityForm: $("identityForm"),
     nameFields: $("nameFields"),
+    pickFields: $("pickFields"),
+    whoPicker: $("whoPicker"),
     prefsFields: $("prefsFields"),
     firstName: $("firstName"),
     lastName: $("lastName"),
@@ -292,10 +294,10 @@
         ? p.diets.map(function (d) { return labelOf(DIETS, d) || d; }).join(", ")
         : "Aucune restriction"],
       ["Accessibilité", labelOf(ACCESS, p.access)],
-      ["Précisions", p.notes || "—"]
+      ["Précisions", p.notes || "non renseigné"]
     ];
     el.myPrefs.innerHTML = rows.map(function (r) {
-      return "<li><span>" + r[0] + "</span><b>" + escapeHtml(r[1] || "—") + "</b></li>";
+      return "<li><span>" + r[0] + "</span><b>" + escapeHtml(r[1] || "non renseigné") + "</b></li>";
     }).join("");
   }
 
@@ -349,20 +351,46 @@
   var MODAL_TEXT = {
     join: {
       title: "Je souhaite participer",
-      intro: "Prénom et nom obligatoires, une seule inscription par personne. Le reste nous aide à organiser, réponds au mieux.",
+      intro: "Prénom et nom obligatoires, une seule inscription par personne. Les autres questions servent à organiser la sortie.",
       cta: "Je m'inscris"
     },
     edit: {
       title: "J'ai déjà répondu",
-      intro: "Redonne le prénom et le nom utilisés à l'inscription, on recharge ta réponse.",
-      cta: "Retrouver ma réponse"
+      intro: "Sélectionnez votre nom dans la liste pour récupérer votre réponse et la modifier.",
+      cta: "Continuer"
     },
     prefs: {
-      title: "Mes infos pratiques",
-      intro: "Mets à jour ce qui a changé.",
+      title: "Mes informations",
+      intro: "Mettez à jour ce qui a changé.",
       cta: "Enregistrer"
     }
   };
+
+  /* liste déroulante des participants déjà inscrits */
+  function fillWhoPicker() {
+    var people = Object.keys(everyone)
+      .map(function (k) { return everyone[k]; })
+      .filter(function (p) { return p && p.firstName && p.lastName; })
+      .sort(function (a, b) {
+        return (a.firstName + a.lastName).localeCompare(b.firstName + b.lastName, "fr");
+      });
+
+    if (!people.length) {
+      el.whoPicker.innerHTML = '<option value="">Aucun participant inscrit</option>';
+      el.whoPicker.disabled = true;
+      el.modalSubmit.disabled = true;
+      fail("Personne n'est encore inscrit. Utilisez « Je souhaite participer ».");
+      return;
+    }
+
+    el.whoPicker.disabled = false;
+    el.modalSubmit.disabled = false;
+    el.whoPicker.innerHTML = '<option value="">Choisissez votre nom</option>' +
+      people.map(function (p) {
+        return '<option value="' + escapeHtml(p.key) + '">' +
+          escapeHtml(p.firstName + " " + p.lastName) + "</option>";
+      }).join("");
+  }
 
   function openModal(mode) {
     modalMode = mode;
@@ -372,21 +400,32 @@
     el.modalSubmit.textContent = t.cta;
     el.identityError.hidden = true;
 
-    el.nameFields.hidden = (mode === "prefs");
+    el.nameFields.hidden = (mode !== "join");
+    el.pickFields.hidden = (mode !== "edit");
     el.prefsFields.hidden = (mode === "edit");
 
     if (mode === "prefs") {
       writePrefs((everyone[me.key] || {}).prefs);
-    } else {
+    } else if (mode === "join") {
       el.firstName.value = "";
       el.lastName.value = "";
-      if (mode === "join") writePrefs({});
+      writePrefs({});
+    } else {
+      // on relit la base pour proposer une liste à jour
+      el.whoPicker.innerHTML = '<option value="">Chargement…</option>';
+      el.whoPicker.disabled = true;
+      el.modalSubmit.disabled = true;
+      loadAll()
+        .then(function (data) { everyone = data || {}; render(); })
+        .catch(function () { /* on retombe sur la liste déjà en mémoire */ })
+        .then(fillWhoPicker);
     }
 
     if (typeof el.modal.showModal === "function") el.modal.showModal();
     else el.modal.setAttribute("open", "");
     setTimeout(function () {
-      (mode === "prefs" ? el.budget : el.firstName).focus();
+      var first = mode === "prefs" ? el.budget : (mode === "edit" ? el.whoPicker : el.firstName);
+      first.focus();
     }, 60);
   }
 
@@ -424,20 +463,42 @@
       return;
     }
 
+    /* reprise d'une réponse : sélection dans la liste des inscrits */
+    if (modalMode === "edit") {
+      var chosen = el.whoPicker.value;
+      if (!chosen) {
+        fail("Sélectionnez votre nom dans la liste.");
+        return;
+      }
+      var rec2 = everyone[chosen];
+      if (!rec2) {
+        fail("Cette réponse n'existe plus. Fermez la fenêtre et réessayez.");
+        return;
+      }
+      me = { key: chosen, firstName: rec2.firstName, lastName: rec2.lastName };
+      localStorage.setItem(ME_KEY, JSON.stringify(me));
+      closeModal();
+      showIdentity();
+      applyMyAnswer();
+      el.cardCalendar.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    /* nouvelle inscription */
     var f = titleCase(el.firstName.value);
     var l = titleCase(el.lastName.value);
     if (!f || !l) {
-      fail("Prénom et nom sont obligatoires, sinon on ne sait pas qui n'est pas dispo.");
+      fail("Le prénom et le nom sont obligatoires.");
       return;
     }
     var key = slugify(f + " " + l);
     if (!key) {
-      fail("Ce prénom et ce nom ne sont pas exploitables, utilise des lettres.");
+      fail("Ce prénom et ce nom ne sont pas exploitables, utilisez des lettres.");
       return;
     }
 
-    var cta = MODAL_TEXT[modalMode].cta;
-    var prefs = modalMode === "join" ? readPrefs() : null;
+    var cta = MODAL_TEXT.join.cta;
+    var prefs = readPrefs();
     el.modalSubmit.disabled = true;
     el.modalSubmit.textContent = "Vérification…";
     el.identityError.hidden = true;
@@ -447,44 +508,32 @@
       .then(function (data) { everyone = data || {}; render(); })
       .catch(function () { /* on tranche sur ce qu'on a déjà en mémoire */ })
       .then(function () {
-        var exists = !!everyone[key];
-
-        if (modalMode === "join" && exists) {
+        if (everyone[key]) {
           el.modalSubmit.disabled = false;
           el.modalSubmit.textContent = cta;
-          fail("<strong>" + escapeHtml(f + " " + l) + "</strong> a déjà participé. " +
-               "Si c'est bien toi, ferme cette fenêtre et clique sur « J'ai déjà répondu » pour modifier ta réponse. " +
-               "Sinon ajoute une initiale pour te distinguer.");
-          return;
-        }
-        if (modalMode === "edit" && !exists) {
-          el.modalSubmit.disabled = false;
-          el.modalSubmit.textContent = cta;
-          fail("Aucune réponse enregistrée pour <strong>" + escapeHtml(f + " " + l) + "</strong>. " +
-               "Vérifie l'orthographe, ou passe par « Je souhaite participer ».");
+          fail("<strong>" + escapeHtml(f + " " + l) + "</strong> est déjà inscrit. " +
+               "S'il s'agit de vous, fermez cette fenêtre et passez par « J'ai déjà répondu ». " +
+               "Sinon, ajoutez une initiale pour vous distinguer.");
           return;
         }
 
         me = { key: key, firstName: f, lastName: l };
         localStorage.setItem(ME_KEY, JSON.stringify(me));
 
-        var done = Promise.resolve();
-        if (modalMode === "join") {
-          // l'inscription réserve tout de suite le nom, dispos vides pour l'instant
-          picked = {};
-          done = persist(buildRecord(prefs)).catch(function (err) {
+        // l'inscription réserve le nom tout de suite, sans indisponibilité pour l'instant
+        picked = {};
+        return persist(buildRecord(prefs))
+          .catch(function (err) {
             setStatus("Inscription non synchronisée (" + err.message + ").", "err");
+          })
+          .then(function () {
+            el.modalSubmit.disabled = false;
+            el.modalSubmit.textContent = cta;
+            closeModal();
+            showIdentity();
+            applyMyAnswer();
+            el.cardCalendar.scrollIntoView({ behavior: "smooth", block: "start" });
           });
-        }
-
-        return done.then(function () {
-          el.modalSubmit.disabled = false;
-          el.modalSubmit.textContent = cta;
-          closeModal();
-          showIdentity();
-          applyMyAnswer();
-          el.cardCalendar.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
       });
   });
 
@@ -520,7 +569,7 @@
         } else if (isWeekend(d)) {
           html += '<button type="button" class="day day--pick" data-iso="' + iso +
             '" aria-pressed="false" aria-label="' + fmtShort(d) + " " + y +
-            ' — marquer comme indisponible">' + day + "</button>";
+            ', marquer comme indisponible">' + day + "</button>";
         } else {
           html += '<div class="day day--off" title="Jour de semaine">' + day + "</div>";
         }
@@ -566,7 +615,7 @@
         return refresh(true);
       })
       .catch(function (err) {
-        setStatus("Échec de l'enregistrement (" + err.message + "). Vérifie ta connexion ou les règles Firebase.", "err");
+        setStatus("Échec de l'enregistrement (" + err.message + "). Vérifiez votre connexion.", "err");
       })
       .then(function () {
         el.saveBtn.disabled = false;
@@ -595,7 +644,7 @@
     var total = people.length;
 
     if (!total) {
-      el.resultsIntro.textContent = "Personne n'a encore répondu. Sois le premier.";
+      el.resultsIntro.textContent = "Aucune réponse pour l'instant.";
       el.ranking.innerHTML = "";
       el.peopleBlock.hidden = true;
       el.groupRecap.hidden = true;
@@ -627,7 +676,7 @@
 
     var best = scored[0].free;
     el.resultsIntro.innerHTML = best === 0
-      ? "Aucun week-end ne fait l'unanimité pour l'instant, regarde le détail ci-dessous."
+      ? "Aucun week-end ne convient à tout le monde pour l'instant, voir le détail ci-dessous."
       : "Meilleur créneau actuel : <strong>" + scored[0].w.label + "</strong>, avec <strong>" +
         best + " personne" + (best > 1 ? "s" : "") + " sur " + total + "</strong> disponible" +
         (best > 1 ? "s" : "") + ".";
@@ -636,7 +685,7 @@
       var isTop = s.free === best && best > 0;
       var dayDetail = s.w.days.map(function (iso) {
         return fmtShort(parseISO(iso)) + " : " + s.perDay[iso];
-      }).join(" · ");
+      }).join(", ");
       var busy = s.busyNames.length
         ? "Indispos : " + escapeHtml(s.busyNames.slice(0, 6).join(", ")) +
           (s.busyNames.length > 6 ? " +" + (s.busyNames.length - 6) : "")
@@ -662,7 +711,7 @@
       var un = Array.isArray(p.unavailable) ? p.unavailable : [];
       var detail = un.length
         ? un.length + " jour" + (un.length > 1 ? "s" : "") + " bloqué" + (un.length > 1 ? "s" : "")
-        : "dispo partout";
+        : "disponible partout";
       return "<li><b>" + escapeHtml(p.firstName + " " + p.lastName) + "</b><em>" + detail + "</em></li>";
     }).join("");
     el.peopleBlock.hidden = false;
@@ -716,11 +765,11 @@
       .map(function (p) {
         return p.firstName + " " + p.lastName.charAt(0) + "." + " : " + labelOf(ACCESS, p.prefs.access);
       });
-    if (acc.length) rows.push(["Accessibilité", acc.join(" · ")]);
+    if (acc.length) rows.push(["Accessibilité", acc.join(" ; ")]);
 
     var notes = people.filter(function (p) { return (p.prefs || {}).notes; })
       .map(function (p) { return p.firstName + " : " + p.prefs.notes; });
-    if (notes.length) rows.push(["Précisions", notes.join(" · ")]);
+    if (notes.length) rows.push(["Précisions", notes.join(" ; ")]);
 
     el.recapList.innerHTML = rows.map(function (r) {
       return "<li><span>" + escapeHtml(r[0]) + "</span><b>" + escapeHtml(r[1]) + "</b></li>";

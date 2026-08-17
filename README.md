@@ -6,7 +6,8 @@ Chacun clique sur **Je souhaite participer**, renseigne prénom + nom (obligatoi
 
 - Période : 1er septembre → 31 octobre 2026 (modifiable dans `config.js`)
 - Jours de semaine grisés et non cliquables, seuls les samedis et dimanches sont sélectionnables
-- Une seule inscription par prénom + nom : un nom déjà présent est refusé à l'inscription et renvoyé vers **J'ai déjà répondu**, qui recharge la réponse existante pour la modifier
+- Une seule inscription par prénom + nom : un nom déjà présent est refusé à l'inscription et renvoyé vers **J'ai déjà répondu**, où il suffit de **sélectionner son nom dans la liste** des inscrits pour recharger sa réponse et la modifier
+- Interface claire et sobre, une seule couleur d'accent, aucun visuel décoratif
 - Mobile first, aucune dépendance, aucun build, aucun tracking
 - 4 fichiers : `index.html`, `styles.css`, `app.js`, `config.js`
 
@@ -99,6 +100,6 @@ Le dernier week-end de la période est le samedi 31 octobre seul, le dimanche 1e
 
 ## Modifier une réponse
 
-Le prénom + nom sert de clé (accents, majuscules et espaces sont normalisés, donc `JULIAN GAUTIER` et `julian gautier` sont la même personne). Quelqu'un qui revient avec la même orthographe retrouve sa réponse et l'écrase. Une orthographe franchement différente crée un doublon, à supprimer depuis la console Firebase le cas échéant.
+Le prénom + nom sert de clé (accents, majuscules et espaces sont normalisés, donc `JULIAN GAUTIER` et `julian gautier` sont la même personne). Pour revenir sur sa réponse, on passe par **J'ai déjà répondu** et on choisit son nom dans la liste : plus rien à ressaisir, donc plus de doublon possible par faute de frappe. La liste est rechargée depuis la base à chaque ouverture.
 
 Sur l'appareil déjà utilisé, l'identité est mémorisée et l'étape 1 est passée automatiquement. Le bouton « Ce n'est pas moi » oublie cette mémorisation en local sans rien supprimer en base.
